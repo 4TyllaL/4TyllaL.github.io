@@ -1,6 +1,6 @@
 const STATUS_LABEL = {
   released: "Released",
-  dev: "Em desenvolvimento",
+  dev: "In Development",
   "open-source": "Open Source",
 };
 
@@ -53,17 +53,17 @@ function renderCard(project) {
   ]);
 }
 
-// ---------- dados ao vivo do GitHub ----------
+// ---------- live GitHub data ----------
 
 function timeAgo(iso) {
   const days = Math.floor((Date.now() - new Date(iso)) / 86400000);
-  if (days <= 0) return "hoje";
-  if (days === 1) return "ontem";
-  if (days < 30) return `há ${days} dias`;
+  if (days <= 0) return "today";
+  if (days === 1) return "yesterday";
+  if (days < 30) return `${days} days ago`;
   const months = Math.floor(days / 30);
-  if (months < 12) return months === 1 ? "há 1 mês" : `há ${months} meses`;
+  if (months < 12) return months === 1 ? "1 month ago" : `${months} months ago`;
   const years = Math.floor(months / 12);
-  return years === 1 ? "há 1 ano" : `há ${years} anos`;
+  return years === 1 ? "1 year ago" : `${years} years ago`;
 }
 
 async function fetchJSON(url) {
@@ -89,16 +89,16 @@ async function fillRepoMeta(meta) {
     if (!info) return;
     const parts = [];
     const release = releases?.[0];
-    if (release?.tag_name) parts.push(["versão", release.tag_name]);
+    if (release?.tag_name) parts.push(["version", release.tag_name]);
     if (info.stargazers_count > 0) parts.push(["★", String(info.stargazers_count)]);
-    parts.push(["último commit", timeAgo(info.pushed_at)]);
+    parts.push(["last commit", timeAgo(info.pushed_at)]);
     meta.replaceChildren(...parts.map(([k, v]) => el("span", {}, [`${k} `, el("b", { text: v })])));
   } catch {
-    // sem rede ou limite da API: o card continua completo, só sem esses números
+    // offline or rate-limited: the card stays complete, just without these numbers
   }
 }
 
-// ---------- mascote do !StayAlone ----------
+// ---------- !StayAlone mascot ----------
 
 function drawFrame(ctx, frame) {
   ctx.clearRect(0, 0, 16, 16);
@@ -115,10 +115,10 @@ function drawFrame(ctx, frame) {
 function mountMascotScene(preview) {
   const scene = el("div", { class: "scene" }, [
     el("div", { class: "start" }, [el("i"), el("i"), el("i"), el("i")]),
-    el("div", { class: "tray", text: new Date().toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" }) }),
+    el("div", { class: "tray", text: new Date().toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" }) }),
   ]);
   const canvas = el("canvas", { width: 16, height: 16 });
-  const cat = el("button", { class: "mascot", type: "button", "aria-label": "Fazer carinho no Calcifer" }, canvas);
+  const cat = el("button", { class: "mascot", type: "button", "aria-label": "Pet Calcifer" }, canvas);
   const bubble = el("div", { class: "bubble", "aria-live": "polite" });
   scene.append(cat, bubble);
   preview.append(scene);
