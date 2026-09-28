@@ -3,7 +3,7 @@
 // status: "released" | "dev" | "open-source"
 // repo:   "user/repository" on GitHub (stars, last push and version
 //         come from the public GitHub API when the page loads)
-// preview: { type: "image", src, alt } or { type: "mascot" }
+// preview: { type: "image", src, alt }, { type: "studyia" } or { type: "mascot" }
 
 const GITHUB_USER = "4TyllaL";
 
@@ -17,11 +17,7 @@ const PROJECTS = [
       "A Windows desktop app with quizzes and flashcards, an explanation for every wrong answer and SM-2 scheduling (Anki-style). It generates questions with Gemini and has a debate mode: the AI reads your PDF and argues its central themes with you.",
     highlights: ["SM-2 · Anki-style", "AI debate mode", "0 open ports"],
     stack: ["Python", "JavaScript", "pywebview", "SQLite", "Gemini API"],
-    preview: {
-      type: "image",
-      src: "assets/studyia-home.png",
-      alt: "StudyIA home screen: decks with what is due today, accuracy and streak",
-    },
+    preview: { type: "studyia" },
     links: [
       { label: "Download", href: "https://github.com/4TyllaL/StudyIA/releases/latest", primary: true },
       { label: "GitHub", href: "https://github.com/4TyllaL/StudyIA" },
@@ -77,4 +73,18 @@ const CALCIFER = {
     ],
   },
   phrases: ["Meow!", "Prrr...", "Meow meow!", "*purrs*", "Had some water today?"],
+};
+
+// StudyIA demo: the little window answers these on its own (pick = the option
+// the fake cursor clicks, so some answers come out wrong on purpose).
+const STUDYIA_DEMO = {
+  deck: "Mixed review",
+  questions: [
+    { q: "Which planet is known as the Red Planet?", options: ["Venus", "Mars", "Jupiter"], answer: 1, pick: 0,
+      why: "It's Mars: iron oxide dust covers its surface." },
+    { q: "What does SM-2 decide for each card?", options: ["Its deck", "Next review", "Its color"], answer: 1, pick: 1,
+      next: "4 days" },
+    { q: "HTTP status 404 means...", options: ["Not Found", "Forbidden", "Timeout"], answer: 0, pick: 0,
+      next: "3 days" },
+  ],
 };

@@ -23,6 +23,8 @@ function renderCard(project) {
     preview.append(el("img", { src: project.preview.src, alt: project.preview.alt, loading: "lazy" }));
   } else if (project.preview.type === "mascot") {
     mountMascotScene(preview);
+  } else if (project.preview.type === "studyia") {
+    mountStudyScene(preview);
   }
 
   const badges = el("div", { class: "badges" },
@@ -112,11 +114,16 @@ function drawFrame(ctx, frame) {
   });
 }
 
-function mountMascotScene(preview) {
-  const scene = el("div", { class: "scene" }, [
+// The "desktop" both previews live on: wallpaper, taskbar and clock.
+function desktopScene(variant = "") {
+  return el("div", { class: `scene ${variant}`.trim() }, [
     el("div", { class: "start" }, [el("i"), el("i"), el("i"), el("i")]),
     el("div", { class: "tray", text: new Date().toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" }) }),
   ]);
+}
+
+function mountMascotScene(preview) {
+  const scene = desktopScene();
   const canvas = el("canvas", { width: 16, height: 16 });
   const cat = el("button", { class: "mascot", type: "button", "aria-label": "Pet Calcifer" }, canvas);
   const bubble = el("div", { class: "bubble", "aria-live": "polite" });
@@ -186,6 +193,151 @@ function mountMascotScene(preview) {
 
   drawFrame(ctx, CALCIFER.frames.idle);
   requestAnimationFrame(tick);
+}
+
+// ---------- StudyIA demo window ----------
+
+const SVG_NS = "http://www.w3.org/2000/svg";
+
+function cursorIcon() {
+  const svg = document.createElementNS(SVG_NS, "svg");
+  svg.setAttribute("viewBox", "0 0 12 18");
+  svg.setAttribute("aria-hidden", "true");
+  const path = document.createElementNS(SVG_NS, "path");
+  path.setAttribute("d", "M1 1v14l3.5-3.5 2.5 5.5 2.5-1-2.5-5.5H12z");
+  path.setAttribute("fill", "#fff");
+  path.setAttribute("stroke", "#0b0e14");
+  path.setAttribute("stroke-width", "1.2");
+  path.setAttribute("stroke-linejoin", "round");
+  svg.append(path);
+  return svg;
+}
+
+function mountStudyScene(preview) {
+  const scene = desktopScene("scene-study");
+  const count = el("span", { class: "sw-count" });
+  const bar = el("i");
+  const question = el("p", { class: "sw-q" });
+  const options = el("div", { class: "sw-opts" });
+  const feedback = el("p", { class: "sw-fb", "aria-live": "polite" });
+  const cursor = el("div", { class: "sw-cursor" }, cursorIcon());
+
+  const win = el("div", { class: "study-win" }, [
+    el("div", { class: "sw-title" }, [
+      el("span", { class: "sw-logo", text: "✓" }),
+      el("span", {}, ["Study", el("b", { text: "IA" })]),
+      el("span", { class: "sw-ctrl", "aria-hidden": "true", text: "— ▢ ✕" }),
+    ]),
+    el("div", { class: "sw-body" }, [
+      el("div", { class: "sw-head" }, [el("span", { text: STUDYIA_DEMO.deck }), count]),
+      el("div", { class: "sw-bar" }, bar),
+      question,
+      options,
+      feedback,
+    ]),
+    cursor,
+  ]);
+  scene.append(win);
+  preview.append(scene);
+
+  const qs = STUDYIA_DEMO.questions;
+  let index = 0;
+  let gen = 0; // bumps on every new run, so stale timers of an old run do nothing
+  let answered = false;
+
+  const wait = (ms) => new Promise((r) => setTimeout(r, ms));
+
+  function show(i) {
+    const item = qs[i];
+    answered = false;
+    count.textContent = `${i + 1} / ${qs.length}`;
+    bar.style.width = `${((i + 1) / qs.length) * 100}%`;
+    question.textContent = item.q;
+    feedback.replaceChildren();
+    feedback.className = "sw-fb";
+    options.replaceChildren(...item.options.map((text, n) => {
+      const btn = el("button", { class: "sw-opt", type: "button" }, [el("b", { text: "ABC"[n] }), text]);
+      btn.addEventListener("click", () => userAnswer(n));
+      return btn;
+    }));
+  }
+
+  function reveal(pick) {
+    const item = qs[index];
+    const buttons = options.children;
+    const right = pick === item.answer;
+    answered = true;
+    buttons[item.answer].classList.add("right");
+    if (!right) buttons[pick].classList.add("wrong");
+    feedback.className = `sw-fb show ${right ? "ok" : "bad"}`;
+    feedback.replaceChildren(
+      right ? "✓ Correct " : `✗ ${item.why || `It's ${item.options[item.answer]}.`} `,
+      el("span", { class: "sw-pill", text: right ? `next review in ${item.next || "3 days"}` : "↺ back in 1 min" }),
+    );
+  }
+
+  function moveCursor(target) {
+    const w = win.getBoundingClientRect();
+    const t = target.getBoundingClientRect();
+    const x = t.left - w.left + t.width * 0.55;
+    const y = t.top - w.top + t.height * 0.55;
+    cursor.style.transform = `translate(${x}px, ${y}px)`;
+  }
+
+  function restCursor() {
+    cursor.style.transform = `translate(${win.clientWidth * 0.86}px, ${win.clientHeight * 0.9}px)`;
+  }
+
+  async function autoplay(myGen) {
+    while (myGen === gen) {
+      show(index);
+      await wait(1300);
+      if (myGen !== gen) return;
+      const target = options.children[qs[index].pick];
+      cursor.classList.remove("away");
+      moveCursor(target);
+      await wait(800);
+      if (myGen !== gen) return;
+      cursor.classList.add("click");
+      target.classList.add("pressed");
+      await wait(160);
+      cursor.classList.remove("click");
+      target.classList.remove("pressed");
+      reveal(qs[index].pick);
+      await wait(500);
+      cursor.classList.add("away"); // a real cursor would drift off too; keeps the feedback readable
+      await wait(2400);
+      if (myGen !== gen) return;
+      index = (index + 1) % qs.length;
+    }
+  }
+
+  // The visitor can answer too: that pauses the demo, then it moves on.
+  async function userAnswer(n) {
+    if (answered) return;
+    const myGen = ++gen;
+    reveal(n);
+    cursor.classList.add("away");
+    await wait(3500);
+    if (myGen !== gen) return;
+    index = (index + 1) % qs.length;
+    if (REDUCED_MOTION) show(index);
+    else autoplay(myGen);
+  }
+
+  show(index);
+  if (REDUCED_MOTION) {
+    cursor.hidden = true;
+    return;
+  }
+  // wait until the card is in the page (sizes are known), then place the cursor
+  // without animating it in from the corner
+  setTimeout(() => {
+    restCursor();
+    cursor.getBoundingClientRect();
+    cursor.classList.add("ready");
+    autoplay(gen);
+  }, 0);
 }
 
 // ---------- start ----------
