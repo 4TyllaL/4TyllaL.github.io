@@ -33,9 +33,9 @@ const PROJECTS = [
     status: ["dev", "open-source"],
     tagline: "A pixel-art pet that keeps you company on your desktop.",
     description:
-      "It walks along your taskbar, naps when you step away, reminds you to drink water and stretch, and you can chat with it through an AI plugin. Built to be as light as possible, straight on the Win32 API.",
-    highlights: ["~520 KB", "~1.7 MB RAM", "~0% CPU"],
-    stack: ["Rust", "Win32 API", "Pixel art"],
+      "It walks along your taskbar, naps when you step away, reminds you to drink water and stretch, and chats with you through an AI plugin (Gemini or any OpenAI-compatible API). Four mascots, a mascot maker where you draw one pose (or let the AI draw it) and a plugin system. Built to be as light as possible, straight on the Win32 API, with a Common Criteria-style security review.",
+    highlights: ["~630 KB", "< 5 MB RAM", "~0% CPU"],
+    stack: ["Rust", "Win32 API", "Pixel art", "Gemini API"],
     preview: { type: "mascot" },
     links: [{ label: "GitHub", href: "https://github.com/4TyllaL/notStayAlone", primary: true }],
   },
