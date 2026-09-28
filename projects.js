@@ -1,9 +1,13 @@
 // Project data. To add a new one, copy a block and adjust it.
 //
-// status: "released" | "dev" | "open-source"
+// status: "released" | "dev" | "open-source" | "private"
 // repo:   "user/repository" on GitHub (stars, last push and version
-//         come from the public GitHub API when the page loads)
-// preview: { type: "image", src, alt }, { type: "studyia" } or { type: "mascot" }
+//         come from the public GitHub API when the page loads); leave it out
+//         for private repos
+// preview: { type: "image", src, alt }, { type: "studyia" }, { type: "mascot" }
+//          or { type: "cloudnx" }
+// links:  buttons at the bottom; with none, `note` is shown there instead
+// disclaimer: optional small print at the end of the card
 
 const GITHUB_USER = "4TyllaL";
 
@@ -37,6 +41,19 @@ const PROJECTS = [
       { label: "Download", href: "https://github.com/4TyllaL/notStayAlone/releases/latest/download/dontStayAlone.exe", primary: true },
       { label: "GitHub", href: "https://github.com/4TyllaL/notStayAlone" },
     ],
+  },
+  {
+    name: "CloudNX",
+    status: ["dev", "private"],
+    tagline: "Multi-provider cloud gaming client for a handheld console.",
+    description:
+      "Each cloud gaming service plugs in as its own provider behind a small set of ports, so the core (session, streaming, input and catalog rules) never knows which one is running. Native WebRTC streaming with hardware video decode on the console, a pure policy layer for decode queue, frame timing and audio latency that is tested on the PC, and CI that builds and tests every push.",
+    highlights: ["Clean Architecture", "148 host tests", "WebRTC + FEC"],
+    stack: ["C++", "libnx", "WebRTC", "FFmpeg", "Borealis", "CMake"],
+    preview: { type: "cloudnx" },
+    links: [],
+    note: "Private, personal project",
+    disclaimer: "Unofficial project, not affiliated with or endorsed by any console maker or cloud gaming provider.",
   },
 ];
 
@@ -86,5 +103,14 @@ const STUDYIA_DEMO = {
       next: "4 days" },
     { q: "HTTP status 404 means...", options: ["Not Found", "Forbidden", "Timeout"], answer: 0, pick: 0,
       next: "3 days" },
+  ],
+};
+
+// CloudNX demo: the console "streams" a little game and hops between providers.
+const CLOUDNX_DEMO = {
+  providers: [
+    { name: "Provider A", sky: ["#8fd3ff", "#d8f1ff"], hills: ["#5aa469", "#3d7a4c"], ground: "#c89f65" },
+    { name: "Provider B", sky: ["#ff9a76", "#ffd49a"], hills: ["#a0587a", "#6b3b5e"], ground: "#8a5a44" },
+    { name: "Provider C", sky: ["#1c2250", "#3b3f86"], hills: ["#2c6e8f", "#1c4a63"], ground: "#39405e" },
   ],
 };

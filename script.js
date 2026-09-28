@@ -2,6 +2,7 @@ const STATUS_LABEL = {
   released: "Released",
   dev: "In Development",
   "open-source": "Open Source",
+  private: "Private",
 };
 
 const REDUCED_MOTION = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -25,21 +26,24 @@ function renderCard(project) {
     mountMascotScene(preview);
   } else if (project.preview.type === "studyia") {
     mountStudyScene(preview);
+  } else if (project.preview.type === "cloudnx") {
+    mountCloudScene(preview);
   }
 
   const badges = el("div", { class: "badges" },
     project.status.map((s) => el("span", { class: `badge ${s}`, text: STATUS_LABEL[s] })));
 
-  const meta = el("div", { class: "meta", "data-repo": project.repo });
+  const meta = project.repo ? el("div", { class: "meta", "data-repo": project.repo }) : null;
 
-  const actions = el("div", { class: "actions" },
-    project.links.map((link) => el("a", {
+  const actions = project.links.length
+    ? el("div", { class: "actions" }, project.links.map((link) => el("a", {
       class: `btn${link.primary ? " primary" : ""}`,
       href: link.href,
       target: "_blank",
       rel: "noopener",
       text: link.label,
-    })));
+    })))
+    : el("p", { class: "private-note" }, [el("span", { class: "lock", "aria-hidden": "true", text: "🔒" }), project.note]);
 
   return el("article", { class: "card" }, [
     preview,
@@ -51,6 +55,7 @@ function renderCard(project) {
       el("div", { class: "stack" }, project.stack.map((s) => el("span", { text: s }))),
       meta,
       actions,
+      project.disclaimer ? el("p", { class: "disclaimer", text: project.disclaimer }) : null,
     ]),
   ]);
 }
@@ -338,6 +343,158 @@ function mountStudyScene(preview) {
     cursor.classList.add("ready");
     autoplay(gen);
   }, 0);
+}
+
+// ---------- CloudNX console demo ----------
+
+const RUNNER = {
+  colors: { h: "#ffd8a8", k: "#2b1e2f", b: "#ef476f", l: "#3a3f5c" },
+  frames: [
+    ["..kk..", ".khhk.", "..bb..", ".bbbb.", "b.bb.b", "..bb..", ".l..l.", "l....l"],
+    ["..kk..", ".khhk.", "..bb..", ".bbbb.", ".bbbb.", "..bb..", "..ll..", "..l.l."],
+  ],
+};
+
+function mountCloudScene(preview) {
+  const W = 128, H = 72, GROUND = 58;
+  const scene = desktopScene("scene-nx");
+  const canvas = el("canvas", { width: W, height: H });
+  const provider = el("span", { class: "nx-provider" });
+  const stats = el("span", { class: "nx-stats" });
+  const status = el("div", { class: "nx-connect" });
+  const screen = el("button", { class: "nx-screen", type: "button", "aria-label": "Jump" },
+    [canvas, el("div", { class: "nx-hud" }, [provider, stats]), status]);
+  const joy = (side) => el("div", { class: `nx-joy ${side}`, "aria-hidden": "true" }, [el("i", { class: "stick" }), el("i", { class: "btns" })]);
+  scene.append(el("div", { class: "nx" }, [joy("left"), el("div", { class: "nx-body" }, screen), joy("right")]));
+  preview.append(scene);
+
+  const ctx = canvas.getContext("2d");
+  const providers = CLOUDNX_DEMO.providers;
+  const state = {
+    p: 0, phase: "connecting", phaseLeft: 1.4, t: 0, last: 0,
+    y: 0, vy: 0, crates: [], spawnIn: 1.2, statsIn: 0, frameT: 0, step: 0,
+  };
+
+  function setPhase(phase) {
+    state.phase = phase;
+    const name = providers[state.p].name;
+    if (phase === "connecting") {
+      state.phaseLeft = 1.4;
+      state.crates = [];
+      status.textContent = `Connecting to ${name}...`;
+      screen.classList.add("connecting");
+    } else {
+      state.phaseLeft = 6;
+      provider.textContent = name;
+      screen.classList.remove("connecting");
+    }
+  }
+
+  function jump() {
+    if (state.y === 0 && state.phase === "live") state.vy = 78;
+  }
+  screen.addEventListener("click", jump);
+
+  function drawRunner(x, y, frame) {
+    RUNNER.frames[frame].forEach((row, dy) => {
+      [...row].forEach((ch, dx) => {
+        const c = RUNNER.colors[ch];
+        if (!c) return;
+        ctx.fillStyle = c;
+        ctx.fillRect(x + dx, y + dy, 1, 1);
+      });
+    });
+  }
+
+  function hills(offset, base, amp, freq, color) {
+    ctx.fillStyle = color;
+    for (let x = 0; x < W; x++) {
+      const h = base + amp * Math.sin((x + offset) * freq) + amp * 0.5 * Math.sin((x + offset) * freq * 2.3);
+      ctx.fillRect(x, Math.round(h), 1, GROUND - Math.round(h));
+    }
+  }
+
+  function draw() {
+    const pal = providers[state.p];
+    if (state.phase === "connecting") {
+      ctx.fillStyle = "#07080c";
+      ctx.fillRect(0, 0, W, H);
+      return;
+    }
+    const sky = ctx.createLinearGradient(0, 0, 0, GROUND);
+    sky.addColorStop(0, pal.sky[0]);
+    sky.addColorStop(1, pal.sky[1]);
+    ctx.fillStyle = sky;
+    ctx.fillRect(0, 0, W, GROUND);
+    ctx.fillStyle = "rgba(255, 246, 214, .9)";
+    ctx.beginPath();
+    ctx.arc(102, 14, 6, 0, Math.PI * 2);
+    ctx.fill();
+    hills(state.t * 6, 38, 5, 0.05, pal.hills[0]);
+    hills(state.t * 16 + 40, 47, 3.5, 0.08, pal.hills[1]);
+    ctx.fillStyle = pal.ground;
+    ctx.fillRect(0, GROUND, W, H - GROUND);
+    ctx.fillStyle = "rgba(0, 0, 0, .18)";
+    for (let x = -((state.t * 42) % 10); x < W; x += 10) ctx.fillRect(Math.round(x), GROUND + 3, 5, 1);
+    ctx.fillStyle = "rgba(0, 0, 0, .12)";
+    ctx.fillRect(0, GROUND, W, 1);
+    for (const c of state.crates) {
+      ctx.fillStyle = "#6b4226";
+      ctx.fillRect(Math.round(c), GROUND - 6, 6, 6);
+      ctx.fillStyle = "#a26a3a";
+      ctx.fillRect(Math.round(c) + 1, GROUND - 5, 4, 4);
+    }
+    drawRunner(22, GROUND - 8 - Math.round(state.y), state.y > 0 ? 0 : state.step);
+  }
+
+  function update(dt) {
+    state.phaseLeft -= dt;
+    if (state.phaseLeft <= 0) {
+      if (state.phase === "connecting") setPhase("live");
+      else { state.p = (state.p + 1) % providers.length; setPhase("connecting"); }
+    }
+    if (state.phase !== "live") return;
+    state.t += dt;
+
+    state.spawnIn -= dt;
+    if (state.spawnIn <= 0) { state.crates.push(W + 2); state.spawnIn = 1.3 + Math.random() * 1.6; }
+    state.crates = state.crates.map((c) => c - 42 * dt).filter((c) => c > -8);
+    // autopilot: jump over the next crate (clicking jumps too)
+    if (state.crates.some((c) => c > 24 && c < 38)) jump();
+
+    if (state.y > 0 || state.vy > 0) {
+      state.y += state.vy * dt;
+      state.vy -= 260 * dt;
+      if (state.y <= 0) { state.y = 0; state.vy = 0; }
+    }
+    state.frameT += dt;
+    if (state.frameT > 0.14) { state.frameT = 0; state.step ^= 1; }
+
+    state.statsIn -= dt;
+    if (state.statsIn <= 0) {
+      state.statsIn = 0.6;
+      stats.textContent = `1080p60 · ${18 + Math.round(Math.random() * 14)} ms`;
+    }
+  }
+
+  function tick(now) {
+    const dt = Math.min((now - (state.last || now)) / 1000, 0.1);
+    state.last = now;
+    update(dt);
+    draw();
+    requestAnimationFrame(tick);
+  }
+
+  if (REDUCED_MOTION) {
+    setPhase("live");
+    state.crates = [70];
+    stats.textContent = "1080p60 · 24 ms";
+    draw();
+    return;
+  }
+  setPhase("connecting");
+  draw();
+  requestAnimationFrame(tick);
 }
 
 // ---------- start ----------
