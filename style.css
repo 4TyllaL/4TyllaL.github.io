@@ -573,6 +573,190 @@ h1 {
 
 .nx-screen:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
+/* ---------- Notchn't demo ---------- */
+
+.scene-notch {
+  background:
+    radial-gradient(120% 70% at 85% 110%, rgba(255, 214, 150, .75), transparent 60%),
+    radial-gradient(90% 60% at 10% 100%, rgba(255, 255, 255, .18), transparent 60%),
+    linear-gradient(165deg, #174b5a 0%, #2f8a8c 50%, #7cc3a8 100%);
+}
+
+.notch {
+  --ease: cubic-bezier(.34, 1.3, .55, 1);
+  position: absolute;
+  z-index: 2;
+  top: 0;
+  left: 50%;
+  width: 20cqw;
+  height: 3.4cqw;
+  padding: 0;
+  border: 0;
+  border-radius: 0 0 1.6cqw 1.6cqw;
+  background: #000;
+  color: #fff;
+  font: 500 clamp(7px, 2.2cqw, 11px)/1.3 var(--sans);
+  text-align: left;
+  transform: translateX(-50%);
+  box-shadow: 0 6px 18px -6px rgba(0, 0, 0, .5);
+  overflow: hidden;
+  cursor: pointer;
+  transition: width .5s var(--ease), height .5s var(--ease), border-radius .5s var(--ease);
+}
+
+.notch[data-state="peek"], .notch[data-state="hud"] { width: 38cqw; height: 6.4cqw; border-radius: 0 0 2.6cqw 2.6cqw; }
+.notch[data-state="panel"] { width: 64cqw; height: 30cqw; border-radius: 0 0 3.6cqw 3.6cqw; }
+
+.notch:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+.nt-view {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .15s;
+}
+
+.notch[data-state="peek"] .nt-peek,
+.notch[data-state="panel"] .nt-panel,
+.notch[data-state="hud"] .nt-hud { opacity: 1; transition: opacity .25s .18s; }
+
+.nt-art {
+  flex-shrink: 0;
+  aspect-ratio: 1;
+  border-radius: .6em;
+  background:
+    radial-gradient(circle at 70% 30%, rgba(255, 255, 255, .35), transparent 40%),
+    linear-gradient(135deg, #ff6a88 0%, #7b5cff 55%, #19c9ff 100%);
+}
+
+.nt-art.small { height: 1.7em; border-radius: .35em; }
+
+.nt-peek {
+  display: flex;
+  align-items: center;
+  gap: .7em;
+  padding: 0 1.6cqw;
+}
+
+.nt-peek-title {
+  flex: 1;
+  min-width: 0;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.nt-eq { display: flex; align-items: flex-end; gap: .2em; height: 1.1em; }
+
+.nt-eq i {
+  width: .25em;
+  height: 100%;
+  border-radius: .2em;
+  background: #3ecf8e;
+  transform-origin: bottom;
+  animation: nt-eq .9s ease-in-out infinite;
+}
+
+.nt-eq i:nth-child(2) { animation-delay: -.3s; animation-duration: .7s; }
+.nt-eq i:nth-child(3) { animation-delay: -.55s; animation-duration: 1.1s; }
+
+@keyframes nt-eq { 0%, 100% { transform: scaleY(.3); } 50% { transform: scaleY(1); } }
+
+.nt-panel {
+  display: flex;
+  gap: 1.1em;
+  padding: 2.2cqw 2.4cqw;
+}
+
+.nt-panel .nt-art { height: 100%; }
+
+.nt-tabs {
+  position: absolute;
+  top: 1.4cqw;
+  right: 2cqw;
+  display: flex;
+  gap: .45em;
+}
+
+.nt-tabs i { width: .45em; height: .45em; border-radius: 50%; background: #3a3d45; }
+.nt-tabs i.on { background: #fff; }
+
+.nt-info {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  flex: 1;
+  min-width: 0;
+}
+
+.nt-info b { font-size: 1.25em; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.nt-artist { color: #b8bdc8; }
+.nt-app { color: #6f7684; font-size: .8em; margin-top: .1em; }
+
+.nt-progress {
+  height: .3em;
+  margin-top: .8em;
+  border-radius: 1em;
+  background: #2a2d34;
+  overflow: hidden;
+}
+
+.nt-progress i { display: block; height: 100%; background: #fff; border-radius: inherit; transition: width 1s linear; }
+
+.nt-times {
+  display: flex;
+  justify-content: space-between;
+  margin-top: .3em;
+  color: #6f7684;
+  font: .75em var(--mono);
+}
+
+.nt-controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1.3em;
+  margin-top: .45em;
+  color: #e6e8ee;
+}
+
+.nt-controls svg { width: 1.3em; height: 1.3em; display: block; }
+
+.nt-controls .play {
+  display: grid;
+  place-items: center;
+  width: 2em;
+  height: 2em;
+  border-radius: 50%;
+  background: #fff;
+  color: #000;
+}
+
+.nt-controls .play svg { width: 1.05em; height: 1.05em; }
+
+.nt-hud {
+  display: flex;
+  align-items: center;
+  gap: .7em;
+  padding: 0 1.8cqw;
+}
+
+.nt-hud-icon svg { display: block; width: 1.35em; height: 1.35em; }
+
+.nt-hud-bar {
+  flex: 1;
+  height: .35em;
+  border-radius: 1em;
+  background: #2a2d34;
+  overflow: hidden;
+}
+
+.nt-hud-bar i { display: block; height: 100%; background: #fff; border-radius: inherit; transition: width .25s ease; }
+
+.nt-hud-val { min-width: 2.6em; text-align: right; font: 600 .85em var(--mono); }
+
 /* card without buttons (private projects) */
 .private-note {
   display: flex;

@@ -28,6 +28,8 @@ function renderCard(project) {
     mountStudyScene(preview);
   } else if (project.preview.type === "cloudnx") {
     mountCloudScene(preview);
+  } else if (project.preview.type === "notch") {
+    mountNotchScene(preview);
   }
 
   const badges = el("div", { class: "badges" },
@@ -43,7 +45,7 @@ function renderCard(project) {
       rel: "noopener",
       text: link.label,
     })))
-    : el("p", { class: "private-note" }, [el("span", { class: "lock", "aria-hidden": "true", text: "🔒" }), project.note]);
+    : el("p", { class: "private-note" }, [el("span", { class: "lock", "aria-hidden": "true", text: project.noteIcon || "🔒" }), project.note]);
 
   return el("article", { class: "card" }, [
     preview,
@@ -495,6 +497,162 @@ function mountCloudScene(preview) {
   setPhase("connecting");
   draw();
   requestAnimationFrame(tick);
+}
+
+// ---------- Notchn't demo ----------
+
+function fmtTime(sec) {
+  const s = Math.max(0, Math.floor(sec));
+  return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`;
+}
+
+const ICONS = {
+  prev: "M6 5h2v14H6zM20 5v14L9 12z",
+  pause: "M7 5h4v14H7zM13 5h4v14h-4z",
+  next: "M16 5h2v14h-2zM4 5v14l11-7z",
+  speaker: "M3 9h4l5-4v14l-5-4H3z",
+  waves: "M15.5 8.5a5 5 0 0 1 0 7M18 6a8.5 8.5 0 0 1 0 12",
+};
+
+function icon(name) {
+  const svg = document.createElementNS(SVG_NS, "svg");
+  svg.setAttribute("viewBox", "0 0 24 24");
+  svg.setAttribute("aria-hidden", "true");
+  const path = document.createElementNS(SVG_NS, "path");
+  path.setAttribute("d", ICONS[name]);
+  path.setAttribute("fill", "currentColor");
+  svg.append(path);
+  if (name === "speaker") {
+    const waves = document.createElementNS(SVG_NS, "path");
+    waves.setAttribute("d", ICONS.waves);
+    waves.setAttribute("fill", "none");
+    waves.setAttribute("stroke", "currentColor");
+    waves.setAttribute("stroke-width", "1.8");
+    waves.setAttribute("stroke-linecap", "round");
+    svg.append(waves);
+  }
+  return svg;
+}
+
+function mountNotchScene(preview) {
+  const track = NOTCH_DEMO.track;
+  const scene = desktopScene("scene-notch");
+  const eq = () => el("span", { class: "nt-eq", "aria-hidden": "true" }, [el("i"), el("i"), el("i")]);
+
+  const fill = el("i");
+  const elapsed = el("span");
+  const hudFill = el("i");
+  const hudLabel = el("span", { class: "nt-hud-val" });
+
+  const peek = el("div", { class: "nt-view nt-peek" }, [
+    el("span", { class: "nt-art small" }),
+    el("span", { class: "nt-peek-title", text: track.title }),
+    eq(),
+  ]);
+
+  const panel = el("div", { class: "nt-view nt-panel" }, [
+    el("div", { class: "nt-tabs", "aria-hidden": "true" }, [el("i", { class: "on" }), el("i"), el("i")]),
+    el("span", { class: "nt-art" }),
+    el("div", { class: "nt-info" }, [
+      el("b", { text: track.title }),
+      el("span", { class: "nt-artist", text: track.artist }),
+      el("span", { class: "nt-app", text: track.app }),
+      el("div", { class: "nt-progress" }, fill),
+      el("div", { class: "nt-times" }, [elapsed, el("span", { text: fmtTime(track.length) })]),
+      el("div", { class: "nt-controls", "aria-hidden": "true" }, [
+        icon("prev"), el("span", { class: "play" }, icon("pause")), icon("next"),
+      ]),
+    ]),
+  ]);
+
+  const hud = el("div", { class: "nt-view nt-hud" }, [
+    el("span", { class: "nt-hud-icon" }, icon("speaker")),
+    el("div", { class: "nt-hud-bar" }, hudFill),
+    hudLabel,
+  ]);
+
+  const notch = el("button", { class: "notch", type: "button", "data-state": "idle", "aria-label": "Open the notch" },
+    [peek, panel, hud]);
+  scene.append(notch);
+  preview.append(scene);
+
+  let pos = 71;
+  let volume = 40;
+  let gen = 0;
+  let hovering = false;
+  const wait = (ms) => new Promise((r) => setTimeout(r, ms));
+
+  function setState(state) {
+    notch.dataset.state = state;
+  }
+
+  function renderTrack() {
+    fill.style.width = `${(pos / track.length) * 100}%`;
+    elapsed.textContent = fmtTime(pos);
+  }
+
+  function renderVolume() {
+    hudFill.style.width = `${volume}%`;
+    hudLabel.textContent = `${volume}%`;
+  }
+
+  // the song keeps playing whatever state the notch is in
+  setInterval(() => { pos = (pos + 1) % track.length; renderTrack(); }, 1000);
+  renderTrack();
+  renderVolume();
+
+  async function loop(myGen) {
+    const step = async (state, ms) => {
+      if (myGen !== gen) return false;
+      setState(state);
+      await wait(ms);
+      return myGen === gen;
+    };
+    while (myGen === gen) {
+      if (!await step("idle", 1600)) return;
+      if (!await step("peek", 2000)) return;
+      if (!await step("panel", 3800)) return;
+      if (!await step("idle", 1600)) return;
+      volume = 40;
+      renderVolume();
+      if (!await step("hud", 350)) return;
+      for (let v = 45; v <= 60; v += 5) {
+        volume = v;
+        renderVolume();
+        await wait(300);
+        if (myGen !== gen) return;
+      }
+      if (!await step("hud", 1300)) return;
+    }
+  }
+
+  // like the real one: hover peeks, click opens the panel, leaving tucks it back in
+  notch.addEventListener("mouseenter", () => {
+    hovering = true;
+    gen++;
+    if (notch.dataset.state !== "panel") setState("peek");
+  });
+  notch.addEventListener("click", async () => {
+    const myGen = ++gen;
+    setState(notch.dataset.state === "panel" ? "peek" : "panel");
+    // on touch there is no mouseleave: fold back and resume on our own
+    await wait(6000);
+    if (myGen === gen && !hovering && !REDUCED_MOTION) loop(myGen);
+  });
+  notch.addEventListener("mouseleave", async () => {
+    hovering = false;
+    const myGen = ++gen;
+    setState("idle");
+    if (REDUCED_MOTION) return;
+    await wait(2000);
+    if (myGen === gen && !hovering) loop(myGen);
+  });
+
+  if (REDUCED_MOTION) {
+    setState("panel");
+    return;
+  }
+  loop(gen);
 }
 
 // ---------- start ----------

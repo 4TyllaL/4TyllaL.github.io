@@ -4,9 +4,10 @@
 // repo:   "user/repository" on GitHub (stars, last push and version
 //         come from the public GitHub API when the page loads); leave it out
 //         for private repos
-// preview: { type: "image", src, alt }, { type: "studyia" }, { type: "mascot" }
-//          or { type: "cloudnx" }
+// preview: { type: "image", src, alt }, { type: "studyia" }, { type: "mascot" },
+//          { type: "cloudnx" } or { type: "notch" }
 // links:  buttons at the bottom; with none, `note` is shown there instead
+//         (with `noteIcon`, 🔒 by default)
 // disclaimer: optional small print at the end of the card
 
 const GITHUB_USER = "4TyllaL";
@@ -54,6 +55,19 @@ const PROJECTS = [
     links: [],
     note: "Private, personal project",
     disclaimer: "Unofficial project, not affiliated with or endorsed by any console maker or cloud gaming provider.",
+  },
+  {
+    name: "Notchn't",
+    status: ["dev"],
+    tagline: "World's Best Notch. A native Windows notch that grows into useful panels.",
+    description:
+      "It sits at the top of your screen and opens on hover: what's playing with media controls, audio devices and a one-tap headset mode, a timer, a file shelf, downloads, battery and Bluetooth alerts, and a Ctrl+Alt+N search that launches apps and does math. Every feature is a module on a core that knows nothing about them, and outside plugins run as sandboxed processes with only the permissions you grant.",
+    highlights: ["< 1 MB binary", "~4 MB RAM", "0 idle CPU"],
+    stack: ["Rust", "Win32 API", "WinRT", "Sandboxed plugins"],
+    preview: { type: "notch" },
+    links: [],
+    note: "In development · coming soon",
+    noteIcon: "🛠",
   },
 ];
 
@@ -113,4 +127,9 @@ const CLOUDNX_DEMO = {
     { name: "Provider B", sky: ["#ff9a76", "#ffd49a"], hills: ["#a0587a", "#6b3b5e"], ground: "#8a5a44" },
     { name: "Provider C", sky: ["#1c2250", "#3b3f86"], hills: ["#2c6e8f", "#1c4a63"], ground: "#39405e" },
   ],
+};
+
+// Notchn't demo: the notch peeks, opens its media panel and shows the volume HUD.
+const NOTCH_DEMO = {
+  track: { title: "Night Drive", artist: "Neon Avenue", app: "Media Player", length: 214 },
 };
