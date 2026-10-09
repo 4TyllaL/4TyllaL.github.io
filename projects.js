@@ -6,7 +6,7 @@
 //         come from the public GitHub API when the page loads); leave it out
 //         for private repos
 // preview: { type: "image", src, alt }, { type: "studyia" }, { type: "mascot" },
-//          { type: "cloudnx" } or { type: "notch" }
+//          { type: "notch" } or { type: "dock", src, alt }
 // links:  buttons at the bottom; with none, `note` is shown there instead
 //         (with `noteIcon`, 🔒 by default)
 // disclaimer: optional small print at the end of the card
@@ -46,19 +46,6 @@ const PROJECTS = [
     ],
   },
   {
-    name: "CloudNX",
-    status: ["dev", "private"],
-    tagline: "Multi-provider cloud gaming client for a handheld console.",
-    description:
-      "Each cloud gaming service plugs in as its own provider behind a small set of ports, so the core (session, streaming, input and catalog rules) never knows which one is running. Native WebRTC streaming with hardware video decode on the console, a pure policy layer for decode queue, frame timing and audio latency that is tested on the PC, and CI that builds and tests every push.",
-    highlights: ["Clean Architecture", "148 host tests", "WebRTC + FEC"],
-    stack: ["C++", "libnx", "WebRTC", "FFmpeg", "Borealis", "CMake"],
-    preview: { type: "cloudnx" },
-    links: [],
-    note: "Private, personal project",
-    disclaimer: "Unofficial project, not affiliated with or endorsed by any console maker or cloud gaming provider.",
-  },
-  {
     name: "Notchn't",
     status: ["dev"],
     tagline: "World's Best Notch. A native Windows notch that grows into useful panels.",
@@ -70,6 +57,20 @@ const PROJECTS = [
     links: [],
     note: "In development · coming soon",
     noteIcon: "🛠",
+  },
+  {
+    name: "Dockn't",
+    status: ["beta", "private"],
+    tagline: "This is not a dock. A native bar for Windows 11 with your apps and live widgets.",
+    description:
+      "Your apps on one side, 37 live widgets on the other (clock, calendar, music, Pomodoro, battery, weather and more), each one only as wide as it needs and redrawn only when something changes. Everything is tuned in the Dock Studio with a live preview. It lives alongside the taskbar or replaces it, injects nothing into Explorer and never asks for admin. No account, no telemetry; the data stays on your PC.",
+    highlights: ["37 widgets", "No admin", "No telemetry"],
+    stack: ["Rust", "Win32 API", "Windows 11"],
+    preview: { type: "dock", src: "assets/docknt-dock.png", alt: "Dockn't running on Windows 11 (real screenshot)" },
+    links: [
+      { label: "Website", href: "https://4tyllal.github.io/docknt/", primary: true },
+      { label: "Release notes", href: "https://4tyllal.github.io/docknt/releases.html" },
+    ],
   },
 ];
 
@@ -228,15 +229,6 @@ const STUDYIA_DEMO = {
       next: "4 days" },
     { q: "HTTP status 404 means...", options: ["Not Found", "Forbidden", "Timeout"], answer: 0, pick: 0,
       next: "3 days" },
-  ],
-};
-
-// CloudNX demo: the console "streams" a little game and hops between providers.
-const CLOUDNX_DEMO = {
-  providers: [
-    { name: "Provider A", sky: ["#8fd3ff", "#d8f1ff"], hills: ["#5aa469", "#3d7a4c"], ground: "#c89f65" },
-    { name: "Provider B", sky: ["#ff9a76", "#ffd49a"], hills: ["#a0587a", "#6b3b5e"], ground: "#8a5a44" },
-    { name: "Provider C", sky: ["#1c2250", "#3b3f86"], hills: ["#2c6e8f", "#1c4a63"], ground: "#39405e" },
   ],
 };
 
