@@ -30,10 +30,7 @@ function renderCard(project) {
   } else if (project.preview.type === "notch") {
     mountNotchScene(preview);
   } else if (project.preview.type === "dock") {
-    // Dockn't: a real screenshot of the dock, sitting on the same desktop.
-    const scene = desktopScene("dock-scene");
-    scene.append(el("img", { class: "dock-shot", src: project.preview.src, alt: project.preview.alt, loading: "lazy" }));
-    preview.append(scene);
+    mountDockScene(preview);
   }
 
   const badges = el("div", { class: "badges" },
@@ -110,6 +107,94 @@ async function fillRepoMeta(meta) {
   } catch {
     // offline or rate-limited: the card stays complete, just without these numbers
   }
+}
+
+// ---------- Dockn't dock demo ----------
+
+const DOCK_GLYPHS = {
+  start: '<svg viewBox="0 0 16 16"><path fill="#fff" d="M2 2h5.5v5.5H2zM8.5 2H14v5.5H8.5zM2 8.5h5.5V14H2zM8.5 8.5H14V14H8.5z"/></svg>',
+  search: '<svg viewBox="0 0 16 16" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round"><circle cx="7" cy="7" r="4"/><path d="M10 10l3.2 3.2"/></svg>',
+  files: '<svg viewBox="0 0 16 16"><path fill="#fff6d6" d="M2 4.5c0-.8.6-1.5 1.5-1.5h3l1.5 1.5h4.5c.8 0 1.5.7 1.5 1.5V12c0 .8-.7 1.5-1.5 1.5h-9C2.6 13.5 2 12.8 2 12z"/></svg>',
+  term: '<svg viewBox="0 0 16 16" fill="none" stroke="#fff" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 5l3 3-3 3M8.5 11.5h4"/></svg>',
+  code: '<svg viewBox="0 0 16 16" fill="none" stroke="#fff" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 4.5L2.5 8 6 11.5M10 4.5l3.5 3.5-3.5 3.5"/></svg>',
+  chat: '<svg viewBox="0 0 16 16"><path fill="#fff" d="M3 3.5h10c.6 0 1 .4 1 1v6c0 .6-.4 1-1 1H7l-3 2.5v-2.5H3c-.6 0-1-.4-1-1v-6c0-.6.4-1 1-1z"/></svg>',
+};
+
+function mountDockScene(preview) {
+  const { track, focusMinutes } = DOCK_DEMO;
+  const scene = el("div", { class: "scene scene-dock" });
+
+  const app = (glyph, color, label, running = false) => {
+    const tile = el("button", { class: `dk-app${running ? " running" : ""}`, type: "button", "aria-label": label });
+    tile.style.setProperty("--tile", color);
+    tile.innerHTML = DOCK_GLYPHS[glyph];
+    return tile;
+  };
+
+  const pinned = [
+    app("start", "#3b82f6", "Start"),
+    app("search", "#7c6cf2", "Search"),
+    app("files", "#f2a93b", "Files", true),
+  ];
+  const term = app("term", "#2f3442", "Terminal");
+  const open = [app("code", "#2b7de9", "Code editor", true), app("chat", "#e2574c", "Chat", true), term];
+
+  // clock: the real time, like the widget on the real dock
+  const clockTime = el("b");
+  const clockDate = el("span");
+  const clock = el("div", { class: "dk-w dk-clock" }, [clockTime, clockDate]);
+
+  // music: same track as the notch demo; it changes width on its own
+  const musicFill = el("i");
+  const music = el("div", { class: "dk-w dk-music", "data-size": "3" }, [
+    el("span", { class: "dk-art" }, el("span", { class: "nt-eq", "aria-hidden": "true" }, [el("i"), el("i"), el("i")])),
+    el("div", { class: "dk-track" }, [
+      el("b", { text: track.title }),
+      el("span", { text: track.artist }),
+      el("div", { class: "dk-progress" }, musicFill),
+    ]),
+  ]);
+
+  // pomodoro: a ring that empties as the focus time runs
+  const focusLabel = el("b");
+  const ring = el("span", { class: "dk-ring" });
+  const focus = el("div", { class: "dk-w dk-focus" }, [ring, focusLabel]);
+
+  const bar = el("div", { class: "dk-bar" }, [
+    ...pinned, el("i", { class: "dk-sep" }), ...open, el("i", { class: "dk-sep" }), clock, music, focus,
+  ]);
+  scene.append(bar);
+  preview.append(scene);
+
+  let pos = 92;
+  let left = focusMinutes * 60 - 37;
+  function tick() {
+    const now = new Date();
+    clockTime.textContent = now.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", hour12: false });
+    const start = new Date(now.getFullYear(), 0, 1);
+    const day = Math.floor((now - start) / 86400000) + 1;
+    clockDate.textContent = `Day ${day} of 365`;
+    pos = (pos + 1) % track.length;
+    musicFill.style.width = `${(pos / track.length) * 100}%`;
+    left = left > 0 ? left - 1 : focusMinutes * 60;
+    focusLabel.textContent = fmtTime(left);
+    ring.style.setProperty("--p", `${(left / (focusMinutes * 60)) * 100}%`);
+  }
+  tick();
+  setInterval(tick, 1000);
+  if (REDUCED_MOTION) return;
+
+  // every widget picks the width it needs: the music one cycles through its sizes,
+  // and now and then an app is opened (it bounces and gets its dot)
+  const sizes = ["3", "2", "1", "2"];
+  let s = 0;
+  setInterval(() => { s = (s + 1) % sizes.length; music.dataset.size = sizes[s]; }, 2600);
+  setInterval(() => {
+    term.classList.remove("launch");
+    void term.offsetWidth;
+    term.classList.add("launch");
+    term.classList.toggle("running");
+  }, 5200);
 }
 
 // ---------- !StayAlone mascot ----------

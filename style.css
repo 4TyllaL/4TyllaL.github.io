@@ -226,15 +226,97 @@ h1 {
   background: none;
 }
 
-.dock-scene .dock-shot {
+/* ---------- Dockn't dock demo ---------- */
+
+/* the dock replaces the taskbar: no bar along the bottom */
+.scene-dock::after { display: none; }
+
+.dk-bar {
   position: absolute;
-  left: 50%;
-  bottom: 30px;
-  width: 92%;
-  height: auto;
+  left: 50%; bottom: 3.5cqw;
+  display: flex; align-items: center; gap: .9cqw;
+  padding: 1cqw 1.2cqw;
   transform: translateX(-50%);
-  border-radius: 10px;
-  box-shadow: 0 8px 24px rgb(0 0 0 / 0.35);
+  background: rgba(18, 20, 28, .78);
+  border: 1px solid rgba(255, 255, 255, .1);
+  border-radius: 3cqw;
+  box-shadow: 0 1.5cqw 4cqw rgba(0, 0, 0, .35);
+  backdrop-filter: blur(8px);
+  white-space: nowrap;
+}
+
+.dk-app {
+  position: relative;
+  flex: none;
+  width: 5.6cqw; height: 5.6cqw;
+  padding: 1.15cqw;
+  border: 0; border-radius: 1.6cqw;
+  background: var(--tile);
+  cursor: pointer;
+  transition: transform .18s ease;
+}
+.dk-app svg { width: 100%; height: 100%; display: block; }
+.dk-app:hover { transform: translateY(-.8cqw) scale(1.08); }
+.dk-app.running::after {
+  content: "";
+  position: absolute;
+  left: 50%; bottom: -1cqw;
+  width: 1.6cqw; height: .5cqw;
+  border-radius: 1cqw;
+  background: #9ec3ff;
+  transform: translateX(-50%);
+}
+.dk-app.launch { animation: dk-launch .6s ease; }
+@keyframes dk-launch {
+  30% { transform: translateY(-1.6cqw); }
+  60% { transform: translateY(0); }
+  80% { transform: translateY(-.6cqw); }
+}
+
+.dk-sep { flex: none; width: 1px; height: 4.4cqw; background: rgba(255, 255, 255, .16); }
+
+.dk-w {
+  flex: none;
+  height: 5.6cqw;
+  display: flex; align-items: center; gap: 1cqw;
+  padding: 0 1.3cqw;
+  overflow: hidden;
+  border-radius: 1.6cqw;
+  background: #262a36;
+  color: #e8ebf2;
+  font: 500 1.9cqw/1.15 var(--mono);
+  transition: width .45s cubic-bezier(.3, .7, .2, 1);
+}
+.dk-w b { font-weight: 700; }
+
+.dk-clock { width: 12cqw; flex-direction: column; align-items: flex-start; justify-content: center; gap: .2cqw; }
+.dk-clock b { font-size: 2.8cqw; }
+.dk-clock span { font-size: 1.5cqw; color: #9aa3b5; }
+
+.dk-music { padding: 0 1cqw 0 .9cqw; }
+.dk-music[data-size="1"] { width: 5.6cqw; }
+.dk-music[data-size="2"] { width: 13.5cqw; }
+.dk-music[data-size="3"] { width: 19cqw; }
+.dk-art {
+  flex: none;
+  width: 3.9cqw; height: 3.9cqw;
+  display: grid; place-items: center;
+  border-radius: 1.1cqw;
+  background: linear-gradient(135deg, #ff7a59, #b84df0);
+}
+.dk-track { display: flex; flex-direction: column; gap: .3cqw; min-width: 12cqw; }
+.dk-track span { font-size: 1.5cqw; color: #9aa3b5; }
+.dk-progress { height: .5cqw; border-radius: 1cqw; background: rgba(255, 255, 255, .15); }
+.dk-progress i { display: block; height: 100%; border-radius: inherit; background: #fff; transition: width 1s linear; }
+
+.dk-focus { width: 11.5cqw; }
+.dk-ring {
+  flex: none;
+  width: 3.8cqw; height: 3.8cqw;
+  border-radius: 50%;
+  background: conic-gradient(#ff6b6b var(--p, 100%), rgba(255, 255, 255, .14) 0);
+  -webkit-mask: radial-gradient(circle, transparent 46%, #000 48%);
+          mask: radial-gradient(circle, transparent 46%, #000 48%);
 }
 
 .mascot canvas { width: 100%; height: 100%; image-rendering: pixelated; display: block; }

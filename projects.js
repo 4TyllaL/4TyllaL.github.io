@@ -6,7 +6,7 @@
 //         come from the public GitHub API when the page loads); leave it out
 //         for private repos
 // preview: { type: "image", src, alt }, { type: "studyia" }, { type: "mascot" },
-//          { type: "notch" } or { type: "dock", src, alt }
+//          { type: "notch" } or { type: "dock" }
 // links:  buttons at the bottom; with none, `note` is shown there instead
 //         (with `noteIcon`, 🔒 by default)
 // disclaimer: optional small print at the end of the card
@@ -66,7 +66,7 @@ const PROJECTS = [
       "Your apps on one side, 37 live widgets on the other (clock, calendar, music, Pomodoro, battery, weather and more), each one only as wide as it needs and redrawn only when something changes. Everything is tuned in the Dock Studio with a live preview. It lives alongside the taskbar or replaces it, injects nothing into Explorer and never asks for admin. No account, no telemetry; the data stays on your PC.",
     highlights: ["37 widgets", "No admin", "No telemetry"],
     stack: ["Rust", "Win32 API", "Windows 11"],
-    preview: { type: "dock", src: "assets/docknt-dock.png", alt: "Dockn't running on Windows 11 (real screenshot)" },
+    preview: { type: "dock" },
     links: [
       { label: "Website", href: "https://4tyllal.github.io/docknt/", primary: true },
       { label: "Release notes", href: "https://4tyllal.github.io/docknt/releases.html" },
@@ -230,6 +230,12 @@ const STUDYIA_DEMO = {
     { q: "HTTP status 404 means...", options: ["Not Found", "Forbidden", "Timeout"], answer: 0, pick: 0,
       next: "3 days" },
   ],
+};
+
+// Dockn't demo: pinned apps, open apps and live widgets (no taskbar: the dock replaces it).
+const DOCK_DEMO = {
+  track: { title: "Night Drive", artist: "Neon Avenue", length: 214 },
+  focusMinutes: 25,
 };
 
 // Notchn't demo: the notch peeks, opens its media panel and shows the volume HUD.
