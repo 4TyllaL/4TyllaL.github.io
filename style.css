@@ -825,7 +825,7 @@ h1 {
 }
 
 .badge.released { --c: var(--released); }
-.badge.dev { --c: var(--dev); }
+.badge.dev, .badge.beta { --c: var(--dev); }
 .badge.dev::before { animation: pulse 1.6s ease-in-out infinite; }
 .badge.open-source { --c: var(--oss); }
 .badge.private { --c: var(--private); }

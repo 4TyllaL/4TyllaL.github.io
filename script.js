@@ -1,5 +1,6 @@
 const STATUS_LABEL = {
   released: "Released",
+  beta: "Beta",
   dev: "In Development",
   "open-source": "Open Source",
   private: "Private",
@@ -35,7 +36,7 @@ function renderCard(project) {
   const badges = el("div", { class: "badges" },
     project.status.map((s) => el("span", { class: `badge ${s}`, text: STATUS_LABEL[s] })));
 
-  const meta = project.repo ? el("div", { class: "meta", "data-repo": project.repo }) : null;
+  const meta = project.repo ? el("div", { class: "meta", "data-repo": project.repo, ...(project.version && { "data-version": project.version }) }) : null;
 
   const actions = project.links.length
     ? el("div", { class: "actions" }, project.links.map((link) => el("a", {
@@ -98,7 +99,8 @@ async function fillRepoMeta(meta) {
     if (!info) return;
     const parts = [];
     const release = releases?.[0];
-    if (release?.tag_name) parts.push(["version", release.tag_name]);
+    const version = meta.dataset.version || release?.tag_name;
+    if (version) parts.push(["version", version]);
     if (info.stargazers_count > 0) parts.push(["★", String(info.stargazers_count)]);
     parts.push(["last commit", timeAgo(info.pushed_at)]);
     meta.replaceChildren(...parts.map(([k, v]) => el("span", {}, [`${k} `, el("b", { text: v })])));
@@ -110,7 +112,7 @@ async function fillRepoMeta(meta) {
 // ---------- !StayAlone mascot ----------
 
 function drawFrame(ctx, frame) {
-  ctx.clearRect(0, 0, 16, 16);
+  ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
   frame.forEach((row, y) => {
     [...row].forEach((ch, x) => {
       const color = CALCIFER.colors[ch];
@@ -131,7 +133,8 @@ function desktopScene(variant = "") {
 
 function mountMascotScene(preview) {
   const scene = desktopScene();
-  const canvas = el("canvas", { width: 16, height: 16 });
+  const size = CALCIFER.frames.idle.length;
+  const canvas = el("canvas", { width: size, height: size });
   const cat = el("button", { class: "mascot", type: "button", "aria-label": "Pet Calcifer" }, canvas);
   const bubble = el("div", { class: "bubble", "aria-live": "polite" });
   scene.append(cat, bubble);
