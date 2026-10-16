@@ -77,8 +77,8 @@ const PROJECTS = [
     status: ["beta", "private"],
     tagline: "This is not a dock. A native bar for Windows 11 with your apps and live widgets.",
     description:
-      "Your apps on one side, 37 live widgets on the other (clock, calendar, music, Pomodoro, battery, weather and more), each one only as wide as it needs and redrawn only when something changes. Everything is tuned in the Dock Studio with a live preview. It lives alongside the taskbar or replaces it, injects nothing into Explorer and never asks for admin. No account, no telemetry; the data stays on your PC.",
-    highlights: ["37 widgets", "No admin", "No telemetry"],
+      "Your apps on one side, 39 live widgets on the other (clock, calendar, music, Pomodoro, battery, weather and more), each one only as wide as it needs and redrawn only when something changes. Everything is tuned in the Dock Studio with a live preview. It lives alongside the taskbar or replaces it, injects nothing into Explorer and never asks for admin. No account, no telemetry; the data stays on your PC.",
+    highlights: ["39 widgets", "No admin", "No telemetry"],
     stack: ["Rust", "Win32 API", "Windows 11"],
     preview: { type: "dock" },
     links: [
