@@ -887,3 +887,14 @@ h1 {
 @media (prefers-reduced-motion: reduce) {
   *, *::before { animation: none !important; transition: none !important; }
 }
+
+/* ---------- IsNotAEngine: the wallpaper behind the desktop frame ---------- */
+
+.scene-wall {
+  background: var(--wall) center / cover no-repeat;
+  animation: wall-drift 24s ease-in-out infinite alternate;
+}
+
+@keyframes wall-drift { from { background-position: 45% 50%; } to { background-position: 55% 50%; } }
+
+@media (prefers-reduced-motion: reduce) { .scene-wall { animation: none; } }

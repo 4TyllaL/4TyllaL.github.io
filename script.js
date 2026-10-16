@@ -31,6 +31,8 @@ function renderCard(project) {
     mountNotchScene(preview);
   } else if (project.preview.type === "dock") {
     mountDockScene(preview);
+  } else if (project.preview.type === "wall") {
+    mountWallScene(preview, project.preview.src);
   }
 
   const badges = el("div", { class: "badges" },
@@ -217,6 +219,13 @@ function desktopScene(variant = "") {
     el("div", { class: "start" }, [el("i"), el("i"), el("i"), el("i")]),
     el("div", { class: "tray", text: new Date().toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" }) }),
   ]);
+}
+
+// IsNotAEngine: the wallpaper itself, drawn behind the same desktop frame the other cards use.
+function mountWallScene(preview, src) {
+  const scene = desktopScene("scene-wall");
+  scene.style.setProperty("--wall", `url("${src}")`); // via CSSOM: the page CSP forbids inline style attributes
+  preview.append(scene);
 }
 
 function mountMascotScene(preview) {

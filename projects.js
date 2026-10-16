@@ -6,7 +6,8 @@
 //         come from the public GitHub API when the page loads); leave it out
 //         for private repos
 // preview: { type: "image", src, alt }, { type: "studyia" }, { type: "mascot" },
-//          { type: "notch" } or { type: "dock" }
+//          { type: "notch" }, { type: "dock" } or { type: "wall", src }
+//          (a wallpaper behind the desktop frame)
 // links:  buttons at the bottom; with none, `note` is shown there instead
 //         (with `noteIcon`, 🔒 by default)
 // disclaimer: optional small print at the end of the card
@@ -14,6 +15,19 @@
 const GITHUB_USER = "4TyllaL";
 
 const PROJECTS = [
+  {
+    name: "IsNotAEngine",
+    status: ["dev"],
+    tagline: "Animated wallpapers for Windows, drawn by your GPU.",
+    description:
+      "A native wallpaper engine in Rust: a different animated wallpaper on each monitor, shaders and web pages rendered behind your icons, audio-reactive scenes, and a Studio to browse, tweak and create your own (Shadertoy import, a shader lab, or an AI that writes and checks wallpapers with your own API key). It pauses by itself when a window covers the screen and has a gaming mode that drops it to almost nothing.",
+    highlights: ["Rust · D3D11", "1 wallpaper per monitor", "Gaming mode"],
+    stack: ["Rust", "D3D11", "HLSL", "WebView2", "WASAPI"],
+    preview: { type: "wall", src: "isnotaengine/shots/hero-aurora.jpg" },
+    links: [
+      { label: "Product page", href: "isnotaengine/", primary: true },
+    ],
+  },
   {
     name: "StudyIA",
     repo: "4TyllaL/StudyIA",
